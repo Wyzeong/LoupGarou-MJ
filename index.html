@@ -125,6 +125,7 @@ function setT(k,v){S.tmp[k]=v;save();render()}
 const NUIT=['n_ambiance','n_intro','n_voleur','n_reperage','n_cupidon','n_amoureux','n_voyante','n_loups','n_sorciere','n_fin'];
 const JOUR=['d_reveil','d_election','d_debat','d_vote','d_fin'];
 const ST={};
+const REPERE={chasseur:"Chasseur, lève discrètement le pouce, sans ouvrir les yeux… Sache que ton fusil ne te quitte jamais, même dans ton sommeil : si tu viens à mourir, quelle qu'en soit la raison, tu auras encore la force de tirer une dernière balle et d'emporter quelqu'un avec toi dans la tombe. Tu peux baisser le pouce.",petitefille:"Petite Fille, lève discrètement le pouce, sans ouvrir les yeux… Toi, la curieuse du village, quand les Loups-Garous se réveilleront, tu pourras entrouvrir les yeux pour les espionner. Mais prends garde : s'ils te surprennent, c'est toi qu'ils dévoreront à la place de leur victime. Tu peux baisser le pouce."};
 const aReperer=()=>['chasseur','petitefille'].filter(r=>enJeu(r)>0&&!porteurs(r).length);
 function mortsNuit(){const m=[],n=S.nuit;if(n.victime!=null&&!n.sauvee)m.push(n.victime);if(n.poison!=null&&!m.includes(n.poison))m.push(n.poison);return m}
 
@@ -133,16 +134,16 @@ ST.n_ambiance={cond:()=>S.num===1&&!S.ready,titre:()=>'Il était une fois Thierc
  dire("Bienvenue à Thiercelieux, un petit village perdu au creux de la forêt, loin de tout.<br><br>Depuis plusieurs nuits, d'étranges bruits troublent le sommeil des villageois : des grattements contre les volets… des pas lourds dans la boue… et, au loin, des hurlements qui glacent le sang.<br><br>Le vieux berger a été retrouvé un matin, à l'orée du bois… ou du moins, ce qu'il en restait. Puis ce fut le tour de la fille du meunier. Les traces autour de son corps ne ressemblaient à celles d'aucune bête connue.<br><br>Les anciens murmurent une vieille légende : certains d'entre nous, la nuit venue, ne seraient plus tout à fait humains.<br><br>Ce soir, la lune est pleine. Regardez bien vos voisins… car parmi vous, assis à cette table, se cachent des Loups-Garous.<br><br>Le jour, ils vous sourient. La nuit, ils chassent.<br><br>Votre seule chance de survie : les démasquer… avant qu'il ne soit trop tard.")};
 
 ST.n_intro={titre:()=>'La nuit tombe',btn:'Commencer la nuit',
- html:()=>dire(S.num===1?"C'est la nuit sur Thiercelieux. Tout le village s'endort : fermez les yeux et baissez la tête.":"La nuit tombe sur Thiercelieux. Le village s'endort : fermez les yeux.")+
+ html:()=>dire(S.num===1?"La nuit tombe sur Thiercelieux. Les volets se ferment, les bougies s'éteignent une à une… Tout le village s'endort. Fermez les yeux et baissez la tête.":"La nuit retombe sur Thiercelieux. Les volets se ferment, les bougies s'éteignent… Tout le village s'endort. Fermez les yeux.")+
  `<div class="card tip">• Vérifie que tout le monde a bien les yeux fermés.<br>• Astuce : tapote doucement la table pendant toute la nuit pour couvrir les bruits et les mouvements.<br>• Garde le même ton de voix pour chaque rôle.</div>`};
 
 ST.n_voleur={cond:()=>n1()&&(S.comp.voleur||0)>0,titre:()=>'Le Voleur',btn:'Valider',
  html:()=>{const t=S.tmp;const opts=k=>ORDER.filter(x=>S.comp[x]>0).map(x=>`<option value="${x}" ${t[k]===x?'selected':''}>${rn(x)}</option>`).join('');
-  let h=dire("Voleur, réveille-toi. Tu peux échanger ta carte contre l'une des deux cartes du centre.");
+  let h=dire("Voleur, réveille-toi. Toi qui vis de larcins et de mauvais coups, cette nuit le hasard t'offre une chance unique : au centre de la table reposent deux cartes oubliées. Tu peux échanger ta propre identité contre l'une d'elles… ou garder la tienne. Mais prends garde : si deux Loups-Garous t'attendent au centre, la malédiction est trop forte et tu devras en prendre un. Ton choix est définitif : tu deviendras ce que tu as volé.");
   h+=`<div class="card"><h3>1. Cartes du centre</h3><p class="tip">Regarde discrètement les 2 cartes du centre :</p><select onchange="setT('c1',this.value)"><option value="">Carte 1…</option>${opts('c1')}</select><select onchange="setT('c2',this.value)"><option value="">Carte 2…</option>${opts('c2')}</select></div>`;
   h+=`<div class="card"><h3>2. Qui est le Voleur ?</h3>${picker('vol')}<button class="chip ${t.vol===-1?'sel':''}" onclick="pk('vol',-1,false,1)">Personne (le Voleur est au centre)</button></div>`;
   if(t.vol!=null&&t.vol!==-1&&t.c1&&t.c2){h+=`<div class="card"><h3>3. Son choix</h3><div class="chips">`+[['garder','Garde sa carte'],['c1','Prend '+rn(t.c1)],['c2','Prend '+rn(t.c2)]].map(([v,l])=>`<button class="chip ${t.ch===v?'sel':''}" onclick="setT('ch','${v}')">${l}</button>`).join('')+'</div>'+(t.c1==='loup'&&t.c2==='loup'?'<p class="tip">⚠️ Deux Loups au centre : il est obligé d\'en prendre un.</p>':'')+'<p class="tip">S\'il échange, il prend la carte choisie et pose la sienne au centre.</p></div>'}
-  return h+dire("Voleur, rendors-toi.")},
+  return h+dire("Voleur, rendors-toi… avec ta nouvelle vie entre les mains.")},
  next:()=>{const t=S.tmp;if(!t.c1||!t.c2)return 'Indique les 2 cartes du centre.';if(t.vol==null)return 'Indique qui est le Voleur.';
   const c=[t.c1,t.c2];for(const r of ORDER)if(c.filter(x=>x===r).length>(S.comp[r]||0))return 'Ces 2 cartes ne correspondent pas à la composition.';
   if(t.vol===-1){if(!c.includes('voleur'))return "Si personne n'est Voleur, l'une des cartes du centre doit être le Voleur.";S.out=c;log('Le Voleur était au centre. Hors jeu : '+c.map(x=>ROLES[x].nom).join(', ')+'.');return}
@@ -155,54 +156,54 @@ ST.n_voleur={cond:()=>n1()&&(S.comp.voleur||0)>0,titre:()=>'Le Voleur',btn:'Vali
 
 ST.n_reperage={cond:()=>n1()&&aReperer().length>0,titre:()=>'Repérage discret',btn:'Continuer',
  html:()=>`<p class="tip">Ces rôles ne se réveillent jamais la nuit. Pour savoir qui les a, demande-leur de lever le pouce, yeux fermés. <i>(Habitude courante de meneur, pas une règle officielle.)</i></p>`+
-  aReperer().map(r=>dire(`${ROLES[r].nom}, lève discrètement le pouce sans ouvrir les yeux… Merci, tu peux le baisser.`)+`<div class="card"><h3>${rn(r)}</h3>${picker('rp_'+r,{exclude:pris()})}</div>`).join(''),
+  aReperer().map(r=>dire(REPERE[r])+`<div class="card"><h3>${rn(r)}</h3>${picker('rp_'+r,{exclude:pris()})}</div>`).join(''),
  next:()=>{const rs=aReperer(),ids=rs.map(r=>S.tmp['rp_'+r]);for(let i=0;i<rs.length;i++)if(ids[i]==null)return 'Indique qui est '+ROLES[rs[i]].nom+'.';
   if(new Set(ids).size!==ids.length)return 'Un même joueur ne peut pas avoir deux rôles.';rs.forEach((r,i)=>P(ids[i]).role=r)}};
 
 ST.n_cupidon={cond:()=>n1()&&enJeu('cupidon')>0,titre:()=>'Cupidon',btn:'Valider',
- html:()=>{const c=porteurs('cupidon')[0];return dire("Cupidon, réveille-toi. Désigne les deux joueurs qui seront amoureux jusqu'à la mort.")+
+ html:()=>{const c=porteurs('cupidon')[0];return dire("Cupidon, réveille-toi. Petit ange malicieux, tu tiens entre tes mains l'arc de l'amour éternel. Cette nuit, tu vas décocher deux flèches et unir deux âmes pour toujours, pour le meilleur… et surtout pour le pire. Tu peux même te choisir toi-même. Désigne les deux joueurs qui tomberont amoureux.")+
   (c?`<p class="tip">Cupidon : <b>${esc(c.nom)}</b></p>`:`<div class="card"><h3>Qui est Cupidon ?</h3>${picker('cup',{exclude:pris()})}</div>`)+
-  `<div class="card"><h3>Les 2 amoureux</h3><p class="tip">Cupidon peut se choisir lui-même.</p>${picker('am',{multi:true,max:2})}</div>`+dire("Cupidon, rendors-toi.")},
+  `<div class="card"><h3>Les 2 amoureux</h3><p class="tip">Cupidon peut se choisir lui-même.</p>${picker('am',{multi:true,max:2})}</div>`+dire("Ta mission est accomplie, Cupidon. Range ton arc, rendors-toi… et redeviens un simple habitant de Thiercelieux.")},
  next:()=>{const c=porteurs('cupidon')[0];if(!c&&S.tmp.cup==null)return 'Indique qui est Cupidon.';const a=S.tmp.am||[];if(a.length!==2)return 'Choisis exactement 2 amoureux.';
   if(!c)P(S.tmp.cup).role='cupidon';a.forEach(id=>P(id).lover=true);log(`Cupidon a uni ${P(a[0]).nom} et ${P(a[1]).nom}.`)}};
 
 ST.n_amoureux={cond:()=>n1()&&S.players.some(p=>p.lover),titre:()=>'Les Amoureux',btn:'Continuer',
  html:()=>{const a=S.players.filter(p=>p.lover);return dire("Je vais toucher la tête des deux amoureux…")+
   `<div class="card tip">👉 Fais le tour de la table et touche la tête de <b>${esc(a[0].nom)}</b> et de <b>${esc(a[1].nom)}</b>.</div>`+
-  dire("Amoureux, réveillez-vous et reconnaissez-vous. Vous êtes liés : si l'un de vous meurt, l'autre mourra de chagrin… Amoureux, rendormez-vous.")}};
+  dire("Amoureux, ouvrez les yeux et regardez-vous. La flèche de Cupidon vous a frappés en plein cœur : désormais, vos deux destins n'en font plus qu'un. Si l'un de vous venait à mourir, l'autre, le cœur brisé, le suivrait aussitôt dans la tombe. Jamais vous ne pourrez voter l'un contre l'autre. Et si l'un de vous est un Loup-Garou et l'autre un villageois… alors plus rien ne compte que votre amour : pour triompher, vous devrez être les deux derniers survivants du village. Gardez précieusement votre secret… et rendormez-vous.")}};
 
 ST.n_voyante={cond:()=>actif('voyante'),titre:()=>'La Voyante',btn:'Valider',
- html:()=>{const v=porteurs('voyante')[0],vid=v?v.id:S.tmp.voy;let h=dire("Voyante, réveille-toi. Désigne le joueur dont tu veux connaître la véritable identité.");
+ html:()=>{const v=porteurs('voyante')[0],vid=v?v.id:S.tmp.voy;let h=dire(n1()?"Voyante, réveille-toi. Toi qui lis dans les âmes comme d'autres lisent dans les livres… Chaque nuit, ta boule de cristal te révélera la véritable nature d'un habitant du village. Désigne le joueur dont tu veux percer le secret.":"Voyante, réveille-toi. Ta boule de cristal s'éclaire à nouveau dans l'obscurité… Quel secret veux-tu percer cette nuit ?");
   h+=v?`<p class="tip">Voyante : <b>${esc(v.nom)}</b></p>`:`<div class="card"><h3>Qui est la Voyante ?</h3>${picker('voy',{exclude:pris()})}</div>`;
   h+=`<div class="card"><h3>Joueur désigné</h3>${picker('cible',{exclude:vid!=null?[vid]:[]})}`;
   if(S.tmp.cible!=null){const c=P(S.tmp.cible);h+=`<div class="reveal">👉 Prends la carte de <b>${esc(c.nom)}</b>, montre-la à la Voyante sans bruit, puis repose-la face cachée.${c.role?`<br>Pour info : c'est <b>${rn(c.role)}</b>.`:''}</div>`}
-  return h+'</div>'+dire("Voyante, rendors-toi.")},
+  return h+'</div>'+dire("Garde précieusement ce que tu as vu, Voyante… et rendors-toi.")},
  next:()=>{const v=porteurs('voyante')[0];if(!v&&S.tmp.voy==null)return 'Indique qui est la Voyante.';if(S.tmp.cible==null)return 'Indique le joueur désigné par la Voyante.';
   if(!v)P(S.tmp.voy).role='voyante';const c=P(S.tmp.cible);log(`La Voyante a regardé la carte de ${c.nom}${c.role?' ('+ROLES[c.role].nom+')':''}.`)}};
 
 ST.n_loups={cond:()=>actif('loup'),titre:()=>'Les Loups-Garous',btn:'Valider la victime',
  html:()=>{const nb=enJeu('loup');if(n1()&&S.tmp.lp==null)S.tmp.lp=porteurs('loup').map(p=>p.id);
   const loups=n1()?S.tmp.lp:porteurs('loup').filter(p=>p.alive).map(p=>p.id);
-  let h=dire("Loups-Garous, réveillez-vous et reconnaissez-vous. Mettez-vous d'accord, en silence, sur votre victime de cette nuit.");
+  let h=dire(n1()?"Loups-Garous, réveillez-vous. Ouvrez les yeux et reconnaissez vos frères de meute. Le jour, vous êtes des villageois comme les autres ; mais la nuit, une faim terrible vous dévore. Chaque nuit, vous choisirez ensemble, en silence, une victime. Le jour venu, mentez, accusez, semez le doute… et ne vous faites jamais démasquer. Désignez votre proie.":"Loups-Garous, réveillez-vous. La lune vous appelle et la faim vous tenaille… Qui sera votre proie cette nuit ?");
   h+=n1()?`<div class="card"><h3>Qui sont les Loups ? (${nb})</h3>${picker('lp',{multi:true,max:nb,exclude:pris().filter(id=>P(id).role!=='loup')})}</div>`:`<p class="tip">Loups en vie : <b>${loups.map(nm).join(', ')}</b></p>`;
   h+=`<div class="card"><h3>Victime désignée</h3>${picker('vic',{exclude:loups})}`;
   const pf=S.players.find(p=>p.role==='petitefille'&&p.alive);
   if(pf)h+=`<label class="chk"><input type="checkbox" ${S.tmp.pfs?'checked':''} onchange="setT('pfs',this.checked)"> La Petite Fille (${esc(pf.nom)}) s'est fait surprendre par un Loup : elle meurt à la place de la victime</label>`;
   h+=`</div><p class="tip">${actif('petitefille')?'👀 Surveille la Petite Fille pendant ce tour. ':''}Attends que les Loups soient d'accord et désignent clairement leur victime du doigt.</p>`;
-  return h+dire("Les Loups-Garous, repus, se rendorment.")},
+  return h+dire("Les Loups-Garous, repus, essuient leurs babines, regagnent leurs maisons… et se rendorment.")},
  next:()=>{if(n1()){const lp=S.tmp.lp||[],nb=enJeu('loup');if(lp.length!==nb)return `Sélectionne les ${nb} Loups-Garous.`;lp.forEach(id=>P(id).role='loup')}
   const pf=S.players.find(p=>p.role==='petitefille'&&p.alive);let v=S.tmp.vic;if(pf&&S.tmp.pfs)v=pf.id;
   if(v==null)return 'Indique la victime des Loups.';S.nuit.victime=v;log(`Les Loups ont désigné ${P(v).nom}${pf&&S.tmp.pfs?' (Petite Fille surprise)':''}.`)}};
 
 ST.n_sorciere={cond:()=>actif('sorciere'),titre:()=>'La Sorcière',btn:'Valider',
- html:()=>{const s=porteurs('sorciere')[0],v=S.nuit.victime,sid=s?s.id:S.tmp.sor;let h=dire("Sorcière, réveille-toi. Voici la victime des Loups-Garous cette nuit…");
+ html:()=>{const s=porteurs('sorciere')[0],v=S.nuit.victime,sid=s?s.id:S.tmp.sor;let h=dire(n1()?"Sorcière, réveille-toi. Dans ta chaumière au fond des bois, tu as préparé deux potions. L'une, d'un vert lumineux, peut arracher à la mort celui que les Loups ont attaqué. L'autre, noire comme la nuit, peut emporter n'importe quel habitant en un souffle. Chacune ne servira qu'une seule fois. Cette nuit, les Loups-Garous ont attaqué… cette personne.":"Sorcière, réveille-toi. Les Loups ont encore frappé cette nuit… Voici leur victime.");
   h+=s?`<p class="tip">Sorcière : <b>${esc(s.nom)}</b></p>`:`<div class="card"><h3>Qui est la Sorcière ?</h3>${picker('sor',{exclude:pris()})}</div>`;
   h+=`<div class="reveal">👉 Désigne-lui du doigt : <b>${v!=null?nm(v):'personne'}</b></div><div class="card" style="margin-top:12px"><h3>Potion de vie 💚</h3>`;
-  h+=S.witch.vie?dire("Veux-tu utiliser ta potion de vie pour la sauver ?")+`<button class="chip ${S.tmp.vie?'sel':''}" onclick="setT('vie',!S.tmp.vie)">Oui, elle la sauve</button>`:'<p class="tip">Déjà utilisée.</p>';
+  h+=S.witch.vie?dire("Veux-tu verser quelques gouttes de ta potion de vie sur ses lèvres, et l'arracher à la mort ?")+`<button class="chip ${S.tmp.vie?'sel':''}" onclick="setT('vie',!S.tmp.vie)">Oui, elle la sauve</button>`:'<p class="tip">Déjà utilisée.</p>';
   h+='</div><div class="card"><h3>Potion de mort ☠️</h3>';
-  h+=S.witch.mort?dire("Veux-tu utiliser ta potion de mort ? Si oui, désigne ta cible.")+`<button class="chip ${S.tmp.mo?'sel':''}" onclick="setT('mo',!S.tmp.mo)">Oui, elle empoisonne quelqu'un</button>`+(S.tmp.mo?'<div style="margin-top:12px">'+picker('poi',{exclude:sid!=null?[sid]:[]})+'</div>':''):'<p class="tip">Déjà utilisée.</p>';
-  h+='</div>';if(!S.witch.vie&&!S.witch.mort)h+='<p class="tip">Elle n\'a plus de potion, mais appelle-la quand même pour ne rien laisser deviner au village.</p>';
-  return h+dire("Sorcière, rendors-toi.")},
+  h+=S.witch.mort?dire("Et ta potion de mort… veux-tu la verser cette nuit dans le verre de quelqu'un ? Si oui, désigne ta cible.")+`<button class="chip ${S.tmp.mo?'sel':''}" onclick="setT('mo',!S.tmp.mo)">Oui, elle empoisonne quelqu'un</button>`+(S.tmp.mo?'<div style="margin-top:12px">'+picker('poi',{exclude:sid!=null?[sid]:[]})+'</div>':''):'<p class="tip">Déjà utilisée.</p>';
+  h+='</div><p class="tip">🤫 Ne commente jamais à voix haute ce qu\'elle choisit : tout le village t\'entendrait. Le récit viendra au réveil.</p>';if(!S.witch.vie&&!S.witch.mort)h+='<p class="tip">Elle n\'a plus de potion, mais appelle-la quand même pour ne rien laisser deviner au village.</p>';
+  return h+dire("Sorcière, range tes fioles… et rendors-toi.")},
  next:()=>{const s=porteurs('sorciere')[0];if(!s&&S.tmp.sor==null)return 'Indique qui est la Sorcière.';if(S.tmp.mo&&S.tmp.poi==null)return 'Choisis la cible de la potion de mort.';
   if(!s)P(S.tmp.sor).role='sorciere';
   if(S.tmp.vie&&S.nuit.victime!=null){S.witch.vie=false;S.nuit.sauvee=true;log(`La Sorcière a sauvé ${P(S.nuit.victime).nom}.`)}
@@ -217,22 +218,22 @@ ST.n_fin={titre:()=>'Fin de la nuit',btn:'☀️ Réveiller le village',
  next:()=>{if(!S.ready){S.players.forEach(p=>{if(!p.role)p.role='villageois'});S.ready=true}startJour();return 'GOTO'}};
 
 ST.d_reveil={titre:()=>'Le village se réveille',btn:'Annoncer les morts',
- html:()=>{const m=mortsNuit();return dire(m.length?`Le soleil se lève sur Thiercelieux. Tout le village se réveille… sauf ${m.map(nm).join(' et ')}.`:"Le soleil se lève sur Thiercelieux. Tout le village se réveille… et, miracle, personne n'est mort cette nuit !")+
+ html:()=>{const m=mortsNuit();return dire(m.length?`Le jour se lève sur Thiercelieux. Un à un, les villageois ouvrent les yeux… mais certains ne les rouvriront jamais. Cette nuit, la mort a emporté ${m.map(nm).join(' et ')}.`:(S.nuit.sauvee?"Le jour se lève sur Thiercelieux. Les villageois ouvrent les yeux, le cœur battant, et se comptent… Personne ne manque à l'appel ! Pourtant, de profondes traces de griffes marquent l'une des portes, et une étrange odeur d'herbes flotte dans l'air. Cette nuit, quelqu'un est passé tout près de la mort… et une main mystérieuse l'en a arraché.":"Le jour se lève sur Thiercelieux. Les villageois ouvrent les yeux, le cœur battant, et se comptent… Personne ne manque à l'appel !"))+
   `<p class="tip">Ne dis pas comment ils sont morts : chaque mort retourne simplement sa carte.</p>`},
- next:()=>{mortsNuit().sort(()=>Math.random()-.5).forEach(id=>enfile(id,'nuit'))}};
+ next:()=>{const n=S.nuit;mortsNuit().sort(()=>Math.random()-.5).forEach(id=>enfile(id,id===n.poison?'poison':'loups'))}};
 
 ST.d_election={cond:()=>S.capitaine&&S.num===1&&S.cap==null&&vivants().length>1,titre:()=>'Élection du Capitaine',btn:'Valider',
- html:()=>dire("Avant tout, le village doit élire son Capitaine. Qui veut se présenter ? Chaque candidat peut faire un court discours, puis on vote à main levée.")+
+ html:()=>dire("Face à cette menace, le village a besoin d'un guide : un Capitaine. Celui ou celle qui sera élu portera l'insigne de Thiercelieux, et sa voix comptera double lors des votes. Mais si le Capitaine venait à mourir, il devrait, dans son dernier souffle, désigner lui-même son successeur. Qui veut se présenter ? Chaque candidat a quelques instants pour convaincre… puis nous voterons à main levée.")+
   `<div class="card"><h3>Capitaine élu</h3>${picker('cap')}<p class="tip">Remets-lui la carte ⭐ Capitaine. Son vote comptera double.</p></div>`,
  next:()=>{if(S.tmp.cap==null)return 'Indique le Capitaine élu.';S.cap=S.tmp.cap;log(`${P(S.cap).nom} est élu(e) Capitaine.`)}};
 
 ST.d_debat={titre:()=>'Le débat',btn:'Passer au vote',
- html:()=>dire("Le village se réunit sur la place. Parmi vous se cachent des Loups-Garous… Débattez !")+htmlTimer()+
+ html:()=>dire(S.num===1?"Le village se rassemble sur la place. Chacun scrute son voisin, guette un regard fuyant, une hésitation… Les Loups-Garous sont parmi vous : ils mentiront, ils accuseront, ils joueront les innocents. Parlez, soupçonnez, défendez-vous ! À la fin du débat, le village devra éliminer l'un des siens. Et souvenez-vous : les morts ne parlent plus.":"Le village se rassemble à nouveau sur la place, plus méfiant que jamais… Qui sont les Loups-Garous ? Débattez !")+htmlTimer()+
   `<div class="card tip">• Reste neutre : ne laisse rien paraître de ce que tu sais.<br>• Les joueurs morts ne parlent plus et ne votent pas.<br>• Coupe le débat quand il tourne en rond.</div>`,
  next:()=>{clearInterval(T.iv);T.run=false;T.reste=T.dur}};
 
 ST.d_vote={titre:()=>'Le vote',btn:'Valider le vote',
- html:()=>{const v=S.tmp.votes||(S.tmp.votes={});let h=dire("Le moment est venu de voter. À trois, chacun pointe du doigt la personne qu'il veut éliminer. Un… deux… trois !");
+ html:()=>{const v=S.tmp.votes||(S.tmp.votes={});let h=dire(S.num===1?"L'heure du jugement a sonné. Dans un instant, chacun pointera du doigt celui ou celle qu'il soupçonne. La personne la plus désignée sera exécutée sur la place du village… Réfléchissez bien : si vous vous trompez, c'est un innocent qui mourra, et les Loups riront ce soir. À trois. Un… deux… trois !":"L'heure du jugement a sonné à nouveau. À trois, désignez celui ou celle que vous voulez éliminer. Un… deux… trois !");
   h+='<div class="card"><h3>Décompte (facultatif)</h3>'+vivants().map(p=>`<div class="row"><span class="grow">${esc(p.nom)}${S.cap===p.id?' ⭐':''}</span><button class="ib" onclick="vt(${p.id},-1)">−</button><b class="cnt">${v[p.id]||0}</b><button class="ib" onclick="vt(${p.id},1)">+</button></div>`).join('');
   if(S.cap!=null&&P(S.cap)&&P(S.cap).alive)h+=`<p class="tip">⭐ Le vote de ${nm(S.cap)} (Capitaine) compte double : ajoute 2 voix à sa cible.</p>`;
   h+=`</div><div class="card"><h3>Joueur éliminé</h3>${picker('elim')}<button class="chip ${S.tmp.elim===-1?'sel':''}" onclick="pk('elim',-1,false,1)">Personne</button><p class="tip">En cas d'égalité : fixe une règle avant la partie et garde-la (souvent : le Capitaine départage, ou on revote entre les ex æquo).</p></div>`;
@@ -241,7 +242,7 @@ ST.d_vote={titre:()=>'Le vote',btn:'Valider le vote',
   if(e===-1)log('Le vote n\'a éliminé personne.');else{log(`Le village a voté contre ${P(e).nom}.`);enfile(e,'vote')}}};
 
 ST.d_fin={titre:()=>'La nuit approche',btn:'🌙 Passer à la nuit',
- html:()=>dire("Le soleil se couche sur Thiercelieux. Le village s'endort…")+`<p class="tip">Joueurs en vie : ${vivants().length}</p>`,
+ html:()=>dire("Le soleil disparaît derrière les arbres et l'ombre s'étend sur Thiercelieux. Chacun rentre chez soi et verrouille sa porte… en sachant que cela ne suffira peut-être pas.")+`<p class="tip">Joueurs en vie : ${vivants().length}</p>`,
  next:()=>{startNuit(S.num+1);return 'GOTO'}};
 
 function vt(id,d){const v=S.tmp.votes;v[id]=Math.max(0,(v[id]||0)+d);
@@ -258,15 +259,24 @@ function go(){const st=ST[S.steps[S.idx]],bak=JSON.stringify(S);const r=st.next?
  if(r!=='GOTO'){S.idx++;S.tmp={}}save();window.scrollTo(0,0);render()}
 
 /* ---------- morts ---------- */
-const CAUSES={nuit:'mort(e) cette nuit',vote:'éliminé(e) par le village',chasseur:'abattu(e) par le Chasseur',chagrin:'mort(e) de chagrin'};
+const CAUSES={nuit:'mort(e) cette nuit',loups:'mort(e) cette nuit',poison:'mort(e) cette nuit',vote:'éliminé(e) par le village',chasseur:'abattu(e) par le Chasseur',chagrin:'mort(e) de chagrin'};
 function partenaire(p){return p.lover?S.players.find(x=>x.lover&&x.id!==p.id):null}
+let recit=localStorage.getItem('lgmj_recit')==='1';
+function recitMort(n,c){const fin=` ${n}, retourne ta carte : qui étais-tu vraiment ?`;
+ if((c==='loups'||c==='poison')&&!recit)c='nuit';
+ return {nuit:`Au petit matin, on découvre le corps sans vie de ${n}. La nuit a fait une nouvelle victime…`,
+  loups:`À l'aube, on découvre le corps de ${n} au bord du chemin, lacéré de profondes griffures, au milieu d'empreintes énormes. Les Loups-Garous ont encore frappé…`,
+  poison:`${n} ne s'est jamais réveillé(e). On l'a retrouvé(e) dans son lit, sans la moindre égratignure, le teint livide et les lèvres noircies… Un poison foudroyant.`,
+  vote:`Le village a rendu son verdict. Malgré ses protestations, ${n} est conduit(e) jusqu'au grand chêne de la place, sous le regard de ceux qui furent ses voisins…`,
+  chasseur:`Un coup de feu déchire le silence ! ${n} s'effondre, touché(e) par la dernière balle du Chasseur.`,
+  chagrin:`En voyant s'éteindre l'être aimé, le cœur de ${n} se brise. Incapable de vivre sans l'autre, ${n} s'effondre à son tour, emporté(e) par le chagrin.`}[c]+fin}
 function htmlMort(){const q=S.queue[0],p=P(q.id),r=S.tmp.mr||p.role,a=partenaire(p);
  const ex=S.queue.map(x=>x.id);if(a&&a.alive)ex.push(a.id);
- let h=`<div class="phase">${S.cycle==='nuit'?'🌙 Nuit':'☀️ Jour'} ${S.num}</div><h2>☠️ ${esc(p.nom)}</h2>`+dire(`${esc(p.nom)}, tu es ${CAUSES[q.cause]}. Retourne ta carte face visible.`);
+ let h=`<div class="phase">${S.cycle==='nuit'?'🌙 Nuit':'☀️ Jour'} ${S.num}</div><h2>☠️ ${esc(p.nom)}</h2>`+dire(recitMort(esc(p.nom),q.cause));
  h+=`<div class="card"><h3>Carte révélée</h3><select onchange="setT('mr',this.value)">${ORDER.map(x=>`<option value="${x}" ${x===r?'selected':''}>${rn(x)}</option>`).join('')}</select><p class="tip">Corrige ici si la carte retournée n'est pas celle notée.</p></div>`;
- if(r==='chasseur')h+=dire("Chasseur, dans un dernier souffle, tu tires : désigne le joueur que tu emportes avec toi.")+`<div class="card"><h3>Cible du Chasseur</h3>${picker('tir',{exclude:S.queue.map(x=>x.id)})}</div>`;
+ if(r==='chasseur')h+=dire("Chasseur, tu sens la vie te quitter… mais dans un dernier effort, tu épaules ton fusil. Désigne celui ou celle que tu emportes avec toi dans la tombe.")+`<div class="card"><h3>Cible du Chasseur</h3>${picker('tir',{exclude:S.queue.map(x=>x.id)})}</div>`;
  if(a&&a.alive&&!S.queue.some(x=>x.id===a.id))h+=`<div class="reveal">💔 ${esc(p.nom)} était amoureux(se) de <b>${esc(a.nom)}</b>, qui va mourir de chagrin.</div>`;
- if(S.capitaine&&S.cap===p.id&&vivants().some(x=>!ex.includes(x.id)))h+=dire("Capitaine, avant de mourir, désigne ton successeur.")+`<div class="card" style="margin-top:12px"><h3>Nouveau Capitaine</h3>${picker('succ',{exclude:ex})}</div>`;
+ if(S.capitaine&&S.cap===p.id&&vivants().some(x=>!ex.includes(x.id)))h+=dire("Capitaine, avant de rendre ton dernier souffle, tu tends l'insigne du village à celui ou celle qui le guidera après toi. Désigne ton successeur.")+`<div class="card" style="margin-top:12px"><h3>Nouveau Capitaine</h3>${picker('succ',{exclude:ex})}</div>`;
  return h}
 function confirmMort(){const q=S.queue[0],p=P(q.id),r=S.tmp.mr||p.role,a=partenaire(p);
  const ex=S.queue.map(x=>x.id);if(a&&a.alive)ex.push(a.id);
@@ -282,10 +292,10 @@ function gagnant(){if(!S.ready)return null;const al=vivants();if(!al.length)retu
  const am=S.players.filter(p=>p.lover),mixte=am.length===2&&((am[0].role==='loup')!==(am[1].role==='loup'));
  if(mixte&&al.length===2&&al.every(p=>p.lover))return 'amoureux';
  const l=al.filter(p=>p.role==='loup').length;if(!l)return 'village';if(l===al.length)return 'loups';return null}
-const WIN={village:['🏡','Le village a gagné !',"Tous les Loups-Garous ont été éliminés. Thiercelieux peut enfin dormir tranquille."],
- loups:['🐺','Les Loups-Garous ont gagné !',"Le village a été entièrement dévoré."],
- amoureux:['💘','Les Amoureux ont gagné !',"L'amour a triomphé de tout : ils sont les deux derniers survivants."],
- personne:['💀','Personne ne survit…',"Le village est désert."]};
+const WIN={village:['🏡','Le village a gagné !',"Le dernier Loup-Garou est tombé. Pour la première fois depuis bien longtemps, les hurlements se sont tus… Thiercelieux peut enfin dormir en paix. Le village a gagné !"],
+ loups:['🐺','Les Loups-Garous ont gagné !',"Le dernier villageois s'est effondré. Il ne reste plus à Thiercelieux que des maisons vides… et des Loups-Garous repus qui hurlent à la pleine lune. Les Loups-Garous ont gagné !"],
+ amoureux:['💘','Les Amoureux ont gagné !',"Seuls au milieu du village désert, les deux amoureux se tiennent la main. Ils ont tout sacrifié, trahi les leurs… mais leur amour a survécu à tout. Les Amoureux ont gagné !"],
+ personne:['💀','Personne ne survit…',"Le silence est retombé sur Thiercelieux. Il n'y a plus personne pour raconter ce qui s'est passé ici…"]};
 
 /* ---------- minuteur ---------- */
 let T={dur:180,reste:180,run:false,iv:null};
@@ -353,7 +363,7 @@ function sheet(k){const s=$('#sheet');let h='';
   `<p class="tip" style="margin-top:12px">🧪 Potions de la Sorcière : vie ${S.witch.vie?'✅':'❌'} · mort ${S.witch.mort?'✅':'❌'}</p>`+(S.out.length?`<p class="tip">🃏 Hors jeu (centre) : ${S.out.map(rn).join(', ')}</p>`:'')}
  else if(k==='journal')h='<h2>Journal</h2>'+(S.log.length?S.log.slice().reverse().map(l=>`<div class="row"><span class="tag">${l.c}</span><span class="grow">${esc(l.t)}</span></div>`).join(''):'<p class="tip">Rien pour l\'instant.</p>');
  else if(k.startsWith('aide:')){const r=k.slice(5);h=`<h2>${rn(r)}</h2><p>${ROLES[r].desc}</p>`}
- else h=`<h2>Menu</h2><label class="chk"><input type="checkbox" ${voix?'checked':''} onchange="voix=this.checked;localStorage.setItem(VKEY,voix?'1':'0')"> 🔊 Lire automatiquement les textes « À dire » (voix du téléphone)</label><h3 style="margin-top:18px">Aide-mémoire des rôles</h3>`+
+ else h=`<h2>Menu</h2><label class="chk"><input type="checkbox" ${voix?'checked':''} onchange="voix=this.checked;localStorage.setItem(VKEY,voix?'1':'0')"> 🔊 Lire automatiquement les textes « À dire » (voix du téléphone)</label><label class="chk"><input type="checkbox" ${recit?'checked':''} onchange="recit=this.checked;localStorage.setItem('lgmj_recit',recit?'1':'0')"> 🩸 Récits de mort détaillés : on entend si la victime a été dévorée ou empoisonnée (plus immersif, mais donne un indice au village)</label><h3 style="margin-top:18px">Aide-mémoire des rôles</h3>`+
   ORDER.map(r=>`<details><summary>${rn(r)}</summary><p class="tip">${ROLES[r].desc}</p></details>`).join('')+`<details><summary>⭐ Capitaine</summary><p class="tip">${CAP}</p></details><details><summary>🏆 Victoire</summary><p class="tip">${VICT}</p></details>`+
   `<details><summary>🌙 Ordre d'appel de la nuit</summary><p class="tip">1ʳᵉ nuit seulement : Voleur → Cupidon → Amoureux.<br>Chaque nuit : Voyante → Loups-Garous → Sorcière.</p></details>`+
   (S.phase!=='setup'?`<button class="btn sec" style="margin-top:16px" onclick="abandon(this)">🔁 Abandonner / nouvelle partie</button>`:'');
