@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#12142a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Meneur de Loup-Garou</title>
+<style>
+:root{--bg:#12142a;--card:#1d2142;--card2:#2a2f5e;--txt:#eceaf6;--mut:#a6a9cc;--acc:#8f9cff;--red:#ff6b81;--green:#4fd08f}
+body.jour{--bg:#2a1f14;--card:#3b2c1c;--card2:#523e28;--mut:#d3bd9f;--acc:#f5b041}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--txt);transition:background .4s;-webkit-tap-highlight-color:transparent}
+header{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:6px;padding:10px 12px;padding-top:calc(10px + env(safe-area-inset-top));background:var(--bg);border-bottom:1px solid #ffffff14}
+header h1{font-size:1.05rem;margin:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ib{background:var(--card2);border:0;color:var(--txt);border-radius:10px;padding:8px 11px;font-size:1rem;cursor:pointer;flex-shrink:0}
+main{padding:14px;max-width:640px;margin:0 auto;padding-bottom:120px}
+.card{background:var(--card);border-radius:14px;padding:14px;margin-bottom:12px}
+h2{margin:.2rem 0 .8rem;font-size:1.45rem}
+h3{margin:0 0 .6rem;font-size:.85rem;color:var(--mut);text-transform:uppercase;letter-spacing:.05em}
+.phase{color:var(--acc);font-weight:700;font-size:.85rem;text-transform:uppercase;letter-spacing:.08em}
+.read{border-left:4px solid var(--acc);background:var(--card2);padding:22px 46px 14px 14px;border-radius:10px;font-size:1.18rem;line-height:1.5;font-style:italic;margin:0 0 12px;position:relative}
+.read .lbl{position:absolute;top:6px;left:14px;font-size:.68rem;font-style:normal;text-transform:uppercase;letter-spacing:.08em;color:var(--acc);font-weight:700}
+.read .spk{position:absolute;top:8px;right:8px;background:none;border:0;font-size:1.2rem;cursor:pointer}
+.tip{color:var(--mut);font-size:.93rem;line-height:1.45;margin:.3rem 0}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips.center{justify-content:center}
+.chip{background:var(--card2);border:2px solid transparent;color:var(--txt);border-radius:999px;padding:10px 14px;font-size:1rem;cursor:pointer;margin:0}
+.card>.chip{margin-top:8px}
+.chip.sel{background:var(--acc);color:#111;font-weight:700}
+.reveal{background:#00000033;border:1px dashed var(--acc);border-radius:10px;padding:12px;margin-top:12px;font-size:1.05rem}
+.row{display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid #ffffff12}
+.row:last-child{border-bottom:0}
+.row.mort{opacity:.5}
+.grow{flex:1;min-width:0}
+.num{width:1.6em;color:var(--mut);text-align:right}
+.cnt{min-width:1.6em;text-align:center;font-size:1.1rem}
+.q{color:var(--acc);font-size:.85rem}
+.tag{font-size:.75rem;color:var(--acc);white-space:nowrap}
+select,input{background:var(--card2);color:var(--txt);border:1px solid #ffffff22;border-radius:10px;padding:10px;font-size:1rem;width:100%;margin:4px 0}
+.add{display:flex;gap:8px;margin-top:10px}.add input{margin:0}
+.chk{display:flex;gap:10px;align-items:flex-start;margin-top:12px;line-height:1.35}
+.chk input{width:22px;height:22px;flex-shrink:0;margin:0}
+.ok{color:var(--green);font-weight:700}.err{color:var(--red);font-weight:700}
+.footer{position:fixed;bottom:0;left:0;right:0;padding:14px;padding-bottom:calc(14px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg) 35%)}
+.btn{display:block;width:100%;max-width:612px;margin:0 auto;border:0;border-radius:14px;padding:17px;font-size:1.12rem;font-weight:700;background:var(--acc);color:#111;cursor:pointer}
+.btn:disabled{opacity:.35}
+.btn.sec{background:var(--card2);color:var(--txt)}
+.big{font-size:3.2rem;font-weight:800;text-align:center;font-variant-numeric:tabular-nums;margin:6px 0 12px}
+.win{text-align:center;font-size:1.5rem;font-weight:800;padding:24px 14px}
+.sheet{position:fixed;inset:0;background:#000a;z-index:10;display:flex;align-items:flex-end;justify-content:center}
+.sheet.hidden{display:none}
+.panel{background:var(--bg);width:100%;max-width:640px;max-height:88vh;overflow:auto;border-radius:18px 18px 0 0;padding:18px;padding-bottom:calc(24px + env(safe-area-inset-bottom));position:relative}
+.panel .close{position:absolute;top:14px;right:14px}
+details{background:var(--card);border-radius:10px;padding:10px 12px;margin:6px 0}
+summary{cursor:pointer;font-weight:600}
+#toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:#000d;color:#fff;padding:12px 18px;border-radius:12px;z-index:20;max-width:90vw;text-align:center;opacity:0;transition:opacity .25s;pointer-events:none}
+#toast.on{opacity:1}
+</style>
+</head>
+<body>
+<header id="top"></header>
+<main id="app"></main>
+<div id="sheet" class="sheet hidden"></div>
+<div id="toast"></div>
+<script>
+'use strict';
+const ROLES={
+ loup:{nom:'Loup-Garou',ico:'🐺',max:4,desc:"Chaque nuit, les Loups-Garous se réveillent ensemble et choisissent une victime. Le jour, ils se font passer pour d'innocents villageois."},
+ villageois:{nom:'Simple Villageois',ico:'🧑‍🌾',max:13,desc:"Aucun pouvoir. Ses armes : son intuition, sa parole et son vote."},
+ voyante:{nom:'Voyante',ico:'🔮',max:1,desc:"Chaque nuit, elle découvre la vraie carte d'un joueur de son choix."},
+ sorciere:{nom:'Sorcière',ico:'🧪',max:1,desc:"Elle a deux potions, chacune utilisable une seule fois dans la partie : une potion de vie pour sauver la victime des Loups (elle peut se sauver elle-même) et une potion de mort pour éliminer un joueur. Elle peut utiliser les deux la même nuit."},
+ chasseur:{nom:'Chasseur',ico:'🏹',max:1,desc:"Quand il meurt, quelle qu'en soit la cause, il élimine immédiatement un autre joueur de son choix."},
+ cupidon:{nom:'Cupidon',ico:'💘',max:1,desc:"La première nuit, il désigne deux amoureux (il peut se choisir lui-même). Si l'un meurt, l'autre meurt aussitôt de chagrin. Si le couple est formé d'un Loup et d'un villageois, son seul but devient d'être les deux derniers survivants."},
+ petitefille:{nom:'Petite Fille',ico:'👧',max:1,desc:"Pendant le tour des Loups-Garous, elle peut entrouvrir les yeux pour les espionner. Si un Loup la surprend, elle meurt à la place de la victime désignée."},
+ voleur:{nom:'Voleur',ico:'🃏',max:1,desc:"On distribue 2 cartes de plus que de joueurs (en général 2 Simples Villageois en plus) : les 2 cartes restantes sont posées face cachée au centre. La première nuit, le Voleur peut échanger sa carte contre l'une d'elles. S'il y a 2 Loups-Garous au centre, il est obligé d'en prendre un."}
+};
+const CAP="Élu par le village le premier jour. Son vote compte double. S'il meurt, il désigne immédiatement son successeur.";
+const VICT="🏡 Le village gagne quand tous les Loups-Garous sont morts.<br>🐺 Les Loups-Garous gagnent quand tous les autres joueurs sont morts.<br>💘 Si les Amoureux sont un Loup et un villageois, ils gagnent seulement s'ils sont les deux derniers survivants.<br><br>Astuce : si les Loups sont aussi nombreux que les villageois et que l'issue est évidente, tu peux arrêter la partie plus tôt.";
+const ORDER=Object.keys(ROLES);
+const KEY='lgmj_state_v1',NKEY='lgmj_noms_v1',VKEY='lgmj_voix';
+let HIST=[];
+let voix=localStorage.getItem(VKEY)==='1';
+
+function fresh(){let noms=[];try{noms=JSON.parse(localStorage.getItem(NKEY))||[]}catch(e){}
+ return {phase:'setup',noms,comp:null,compPerso:false,capitaine:true,players:[],cycle:'nuit',num:1,steps:[],idx:0,out:[],cap:null,witch:{vie:true,mort:true},nuit:{victime:null,sauvee:false,poison:null},queue:[],log:[],ready:false,winner:null,tmp:{}}}
+function load(){try{return JSON.parse(localStorage.getItem(KEY))}catch(e){return null}}
+let S=load()||fresh();
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));localStorage.setItem(NKEY,JSON.stringify(S.noms))}catch(e){}}
+function snap(){HIST.push(JSON.stringify(S));if(HIST.length>60)HIST.shift()}
+function undo(){if(!HIST.length){toast('Rien à annuler');return}S=JSON.parse(HIST.pop());save();closeSheet();render();toast('Dernière action annulée')}
+
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const P=id=>S.players.find(p=>p.id===id);
+const nm=id=>{const p=P(id);return p?esc(p.nom):'?'};
+const vivants=()=>S.players.filter(p=>p.alive);
+const enJeu=r=>(S.comp[r]||0)-S.out.filter(x=>x===r).length;
+const porteurs=r=>S.players.filter(p=>p.role===r);
+const pris=()=>S.players.filter(p=>p.role).map(p=>p.id);
+const rn=r=>r?ROLES[r].ico+' '+ROLES[r].nom:'❓ Inconnu';
+const n1=()=>S.num===1&&!S.ready;
+function actif(r){if(n1())return enJeu(r)>0;return S.players.some(p=>p.alive&&p.role===r)}
+function log(t){S.log.push({c:(S.cycle==='nuit'?'🌙 Nuit ':'☀️ Jour ')+S.num,t})}
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),2600)}
+
+/* ---------- composants ---------- */
+function dire(t){return `<div class="read"><span class="lbl">À dire</span><span class="t">${t}</span><button class="spk" onclick="speak(this.parentElement.querySelector('.t').innerText)" aria-label="Lire">🔊</button></div>`}
+function speak(t){if(!('speechSynthesis' in window))return;speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='fr-FR';u.rate=.95;speechSynthesis.speak(u)}
+function picker(f,o={}){const multi=!!o.multi,max=o.max||1,ex=o.exclude||[];
+ const list=(o.list||vivants()).filter(p=>!ex.includes(p.id));const cur=S.tmp[f];
+ if(!list.length)return '<p class="tip">Aucun joueur disponible.</p>';
+ return '<div class="chips">'+list.map(p=>{const sel=multi?(cur||[]).includes(p.id):cur===p.id;
+  return `<button class="chip${sel?' sel':''}" onclick="pk('${f}',${p.id},${multi},${max})">${esc(p.nom)}</button>`}).join('')+'</div>'}
+function pk(f,id,multi,max){if(multi){let a=(S.tmp[f]||[]).slice();if(a.includes(id))a=a.filter(x=>x!==id);else{a.push(id);if(a.length>max)a.shift()}S.tmp[f]=a}
+ else S.tmp[f]=S.tmp[f]===id?null:id;save();render()}
+function setT(k,v){S.tmp[k]=v;save();render()}
+
+/* ---------- déroulé ---------- */
+const NUIT=['n_intro','n_voleur','n_reperage','n_cupidon','n_amoureux','n_voyante','n_loups','n_sorciere','n_fin'];
+const JOUR=['d_reveil','d_election','d_debat','d_vote','d_fin'];
+const ST={};
+const aReperer=()=>['chasseur','petitefille'].filter(r=>enJeu(r)>0&&!porteurs(r).length);
+function mortsNuit(){const m=[],n=S.nuit;if(n.victime!=null&&!n.sauvee)m.push(n.victime);if(n.poison!=null&&!m.includes(n.poison))m.push(n.poison);return m}
+
+ST.n_intro={titre:()=>'La nuit tombe',btn:'Commencer la nuit',
+ html:()=>dire(S.num===1?"C'est la nuit sur Thiercelieux. Tout le village s'endort : fermez les yeux et baissez la tête.":"La nuit tombe sur Thiercelieux. Le village s'endort : fermez les yeux.")+
+ `<div class="card tip">• Vérifie que tout le monde a bien les yeux fermés.<br>• Astuce : tapote doucement la table pendant toute la nuit pour couvrir les bruits et les mouvements.<br>• Garde le même ton de voix pour chaque rôle.</div>`};
+
+ST.n_voleur={cond:()=>n1()&&(S.comp.voleur||0)>0,titre:()=>'Le Voleur',btn:'Valider',
+ html:()=>{const t=S.tmp;const opts=k=>ORDER.filter(x=>S.comp[x]>0).map(x=>`<option value="${x}" ${t[k]===x?'selected':''}>${rn(x)}</option>`).join('');
+  let h=dire("Voleur, réveille-toi. Tu peux échanger ta carte contre l'une des deux cartes du centre.");
+  h+=`<div class="card"><h3>1. Cartes du centre</h3><p class="tip">Regarde discrètement les 2 cartes du centre :</p><select onchange="setT('c1',this.value)"><option value="">Carte 1…</option>${opts('c1')}</select><select onchange="setT('c2',this.value)"><option value="">Carte 2…</option>${opts('c2')}</select></div>`;
+  h+=`<div class="card"><h3>2. Qui est le Voleur ?</h3>${picker('vol')}<button class="chip ${t.vol===-1?'sel':''}" onclick="pk('vol',-1,false,1)">Personne (le Voleur est au centre)</button></div>`;
+  if(t.vol!=null&&t.vol!==-1&&t.c1&&t.c2){h+=`<div class="card"><h3>3. Son choix</h3><div class="chips">`+[['garder','Garde sa carte'],['c1','Prend '+rn(t.c1)],['c2','Prend '+rn(t.c2)]].map(([v,l])=>`<button class="chip ${t.ch===v?'sel':''}" onclick="setT('ch','${v}')">${l}</button>`).join('')+'</div>'+(t.c1==='loup'&&t.c2==='loup'?'<p class="tip">⚠️ Deux Loups au centre : il est obligé d\'en prendre un.</p>':'')+'<p class="tip">S\'il échange, il prend la carte choisie et pose la sienne au centre.</p></div>'}
+  return h+dire("Voleur, rendors-toi.")},
+ next:()=>{const t=S.tmp;if(!t.c1||!t.c2)return 'Indique les 2 cartes du centre.';if(t.vol==null)return 'Indique qui est le Voleur.';
+  const c=[t.c1,t.c2];for(const r of ORDER)if(c.filter(x=>x===r).length>(S.comp[r]||0))return 'Ces 2 cartes ne correspondent pas à la composition.';
+  if(t.vol===-1){if(!c.includes('voleur'))return "Si personne n'est Voleur, l'une des cartes du centre doit être le Voleur.";S.out=c;log('Le Voleur était au centre. Hors jeu : '+c.map(x=>ROLES[x].nom).join(', ')+'.');return}
+  if(c.includes('voleur'))return "Le Voleur est un joueur : il ne peut pas aussi être au centre.";
+  if(!t.ch)return 'Indique le choix du Voleur.';
+  if(t.ch==='garder'&&t.c1==='loup'&&t.c2==='loup')return 'Avec 2 Loups au centre, il doit en prendre un.';
+  const p=P(t.vol);
+  if(t.ch==='garder'){p.role='voleur';S.out=c;log(p.nom+' (Voleur) garde sa carte.')}
+  else{const pr=t[t.ch],au=t.ch==='c1'?t.c2:t.c1;p.role=pr;S.out=['voleur',au];log(`${p.nom} (Voleur) prend la carte ${ROLES[pr].nom}.`)}}};
+
+ST.n_reperage={cond:()=>n1()&&aReperer().length>0,titre:()=>'Repérage discret',btn:'Continuer',
+ html:()=>`<p class="tip">Ces rôles ne se réveillent jamais la nuit. Pour savoir qui les a, demande-leur de lever le pouce, yeux fermés. <i>(Habitude courante de meneur, pas une règle officielle.)</i></p>`+
+  aReperer().map(r=>dire(`${ROLES[r].nom}, lève discrètement le pouce sans ouvrir les yeux… Merci, tu peux le baisser.`)+`<div class="card"><h3>${rn(r)}</h3>${picker('rp_'+r,{exclude:pris()})}</div>`).join(''),
+ next:()=>{const rs=aReperer(),ids=rs.map(r=>S.tmp['rp_'+r]);for(let i=0;i<rs.length;i++)if(ids[i]==null)return 'Indique qui est '+ROLES[rs[i]].nom+'.';
+  if(new Set(ids).size!==ids.length)return 'Un même joueur ne peut pas avoir deux rôles.';rs.forEach((r,i)=>P(ids[i]).role=r)}};
+
+ST.n_cupidon={cond:()=>n1()&&enJeu('cupidon')>0,titre:()=>'Cupidon',btn:'Valider',
+ html:()=>{const c=porteurs('cupidon')[0];return dire("Cupidon, réveille-toi. Désigne les deux joueurs qui seront amoureux jusqu'à la mort.")+
+  (c?`<p class="tip">Cupidon : <b>${esc(c.nom)}</b></p>`:`<div class="card"><h3>Qui est Cupidon ?</h3>${picker('cup',{exclude:pris()})}</div>`)+
+  `<div class="card"><h3>Les 2 amoureux</h3><p class="tip">Cupidon peut se choisir lui-même.</p>${picker('am',{multi:true,max:2})}</div>`+dire("Cupidon, rendors-toi.")},
+ next:()=>{const c=porteurs('cupidon')[0];if(!c&&S.tmp.cup==null)return 'Indique qui est Cupidon.';const a=S.tmp.am||[];if(a.length!==2)return 'Choisis exactement 2 amoureux.';
+  if(!c)P(S.tmp.cup).role='cupidon';a.forEach(id=>P(id).lover=true);log(`Cupidon a uni ${P(a[0]).nom} et ${P(a[1]).nom}.`)}};
+
+ST.n_amoureux={cond:()=>n1()&&S.players.some(p=>p.lover),titre:()=>'Les Amoureux',btn:'Continuer',
+ html:()=>{const a=S.players.filter(p=>p.lover);return dire("Je vais toucher la tête des deux amoureux…")+
+  `<div class="card tip">👉 Fais le tour de la table et touche la tête de <b>${esc(a[0].nom)}</b> et de <b>${esc(a[1].nom)}</b>.</div>`+
+  dire("Amoureux, réveillez-vous et reconnaissez-vous. Vous êtes liés : si l'un de vous meurt, l'autre mourra de chagrin… Amoureux, rendormez-vous.")}};
+
+ST.n_voyante={cond:()=>actif('voyante'),titre:()=>'La Voyante',btn:'Valider',
+ html:()=>{const v=porteurs('voyante')[0],vid=v?v.id:S.tmp.voy;let h=dire("Voyante, réveille-toi. Désigne le joueur dont tu veux connaître la véritable identité.");
+  h+=v?`<p class="tip">Voyante : <b>${esc(v.nom)}</b></p>`:`<div class="card"><h3>Qui est la Voyante ?</h3>${picker('voy',{exclude:pris()})}</div>`;
+  h+=`<div class="card"><h3>Joueur désigné</h3>${picker('cible',{exclude:vid!=null?[vid]:[]})}`;
+  if(S.tmp.cible!=null){const c=P(S.tmp.cible);h+=`<div class="reveal">👉 Prends la carte de <b>${esc(c.nom)}</b>, montre-la à la Voyante sans bruit, puis repose-la face cachée.${c.role?`<br>Pour info : c'est <b>${rn(c.role)}</b>.`:''}</div>`}
+  return h+'</div>'+dire("Voyante, rendors-toi.")},
+ next:()=>{const v=porteurs('voyante')[0];if(!v&&S.tmp.voy==null)return 'Indique qui est la Voyante.';if(S.tmp.cible==null)return 'Indique le joueur désigné par la Voyante.';
+  if(!v)P(S.tmp.voy).role='voyante';const c=P(S.tmp.cible);log(`La Voyante a regardé la carte de ${c.nom}${c.role?' ('+ROLES[c.role].nom+')':''}.`)}};
+
+ST.n_loups={cond:()=>actif('loup'),titre:()=>'Les Loups-Garous',btn:'Valider la victime',
+ html:()=>{const nb=enJeu('loup');if(n1()&&S.tmp.lp==null)S.tmp.lp=porteurs('loup').map(p=>p.id);
+  const loups=n1()?S.tmp.lp:porteurs('loup').filter(p=>p.alive).map(p=>p.id);
+  let h=dire("Loups-Garous, réveillez-vous et reconnaissez-vous. Mettez-vous d'accord, en silence, sur votre victime de cette nuit.");
+  h+=n1()?`<div class="card"><h3>Qui sont les Loups ? (${nb})</h3>${picker('lp',{multi:true,max:nb,exclude:pris().filter(id=>P(id).role!=='loup')})}</div>`:`<p class="tip">Loups en vie : <b>${loups.map(nm).join(', ')}</b></p>`;
+  h+=`<div class="card"><h3>Victime désignée</h3>${picker('vic',{exclude:loups})}`;
+  const pf=S.players.find(p=>p.role==='petitefille'&&p.alive);
+  if(pf)h+=`<label class="chk"><input type="checkbox" ${S.tmp.pfs?'checked':''} onchange="setT('pfs',this.checked)"> La Petite Fille (${esc(pf.nom)}) s'est fait surprendre par un Loup : elle meurt à la place de la victime</label>`;
+  h+=`</div><p class="tip">${actif('petitefille')?'👀 Surveille la Petite Fille pendant ce tour. ':''}Attends que les Loups soient d'accord et désignent clairement leur victime du doigt.</p>`;
+  return h+dire("Les Loups-Garous, repus, se rendorment.")},
+ next:()=>{if(n1()){const lp=S.tmp.lp||[],nb=enJeu('loup');if(lp.length!==nb)return `Sélectionne les ${nb} Loups-Garous.`;lp.forEach(id=>P(id).role='loup')}
+  const pf=S.players.find(p=>p.role==='petitefille'&&p.alive);let v=S.tmp.vic;if(pf&&S.tmp.pfs)v=pf.id;
+  if(v==null)return 'Indique la victime des Loups.';S.nuit.victime=v;log(`Les Loups ont désigné ${P(v).nom}${pf&&S.tmp.pfs?' (Petite Fille surprise)':''}.`)}};
+
+ST.n_sorciere={cond:()=>actif('sorciere'),titre:()=>'La Sorcière',btn:'Valider',
+ html:()=>{const s=porteurs('sorciere')[0],v=S.nuit.victime,sid=s?s.id:S.tmp.sor;let h=dire("Sorcière, réveille-toi. Voici la victime des Loups-Garous cette nuit…");
+  h+=s?`<p class="tip">Sorcière : <b>${esc(s.nom)}</b></p>`:`<div class="card"><h3>Qui est la Sorcière ?</h3>${picker('sor',{exclude:pris()})}</div>`;
+  h+=`<div class="reveal">👉 Désigne-lui du doigt : <b>${v!=null?nm(v):'personne'}</b></div><div class="card" style="margin-top:12px"><h3>Potion de vie 💚</h3>`;
+  h+=S.witch.vie?dire("Veux-tu utiliser ta potion de vie pour la sauver ?")+`<button class="chip ${S.tmp.vie?'sel':''}" onclick="setT('vie',!S.tmp.vie)">Oui, elle la sauve</button>`:'<p class="tip">Déjà utilisée.</p>';
+  h+='</div><div class="card"><h3>Potion de mort ☠️</h3>';
+  h+=S.witch.mort?dire("Veux-tu utiliser ta potion de mort ? Si oui, désigne ta cible.")+`<button class="chip ${S.tmp.mo?'sel':''}" onclick="setT('mo',!S.tmp.mo)">Oui, elle empoisonne quelqu'un</button>`+(S.tmp.mo?'<div style="margin-top:12px">'+picker('poi',{exclude:sid!=null?[sid]:[]})+'</div>':''):'<p class="tip">Déjà utilisée.</p>';
+  h+='</div>';if(!S.witch.vie&&!S.witch.mort)h+='<p class="tip">Elle n\'a plus de potion, mais appelle-la quand même pour ne rien laisser deviner au village.</p>';
+  return h+dire("Sorcière, rendors-toi.")},
+ next:()=>{const s=porteurs('sorciere')[0];if(!s&&S.tmp.sor==null)return 'Indique qui est la Sorcière.';if(S.tmp.mo&&S.tmp.poi==null)return 'Choisis la cible de la potion de mort.';
+  if(!s)P(S.tmp.sor).role='sorciere';
+  if(S.tmp.vie&&S.nuit.victime!=null){S.witch.vie=false;S.nuit.sauvee=true;log(`La Sorcière a sauvé ${P(S.nuit.victime).nom}.`)}
+  if(S.tmp.mo){S.witch.mort=false;S.nuit.poison=S.tmp.poi;log(`La Sorcière a empoisonné ${P(S.tmp.poi).nom}.`)}}};
+
+ST.n_fin={titre:()=>'Fin de la nuit',btn:'☀️ Réveiller le village',
+ html:()=>{const m=mortsNuit();let h=`<div class="card"><h3>Résumé (pour toi seul)</h3><p>${m.length?'Mort(s) au réveil : <b>'+m.map(nm).join(', ')+'</b>':'Personne ne meurt cette nuit 🎉'}</p>${S.nuit.sauvee?'<p class="tip">💚 La Sorcière a sauvé '+nm(S.nuit.victime)+'.</p>':''}</div>`;
+  if(n1()){const libres=S.players.filter(p=>!p.role).length,att=enJeu('villageois')-porteurs('villageois').length;
+   h+=`<p class="tip">Les ${libres} joueur(s) non identifié(s) seront notés Simples Villageois. Tu peux corriger un rôle à tout moment via 👥.</p>`;
+   if(libres!==att)h+=`<p class="err">⚠️ Incohérence : ${libres} joueur(s) restant(s) pour ${att} carte(s) Villageois en jeu. Vérifie les rôles dans 👥.</p>`}
+  return h},
+ next:()=>{if(!S.ready){S.players.forEach(p=>{if(!p.role)p.role='villageois'});S.ready=true}startJour();return 'GOTO'}};
+
+ST.d_reveil={titre:()=>'Le village se réveille',btn:'Annoncer les morts',
+ html:()=>{const m=mortsNuit();return dire(m.length?`Le soleil se lève sur Thiercelieux. Tout le village se réveille… sauf ${m.map(nm).join(' et ')}.`:"Le soleil se lève sur Thiercelieux. Tout le village se réveille… et, miracle, personne n'est mort cette nuit !")+
+  `<p class="tip">Ne dis pas comment ils sont morts : chaque mort retourne simplement sa carte.</p>`},
+ next:()=>{mortsNuit().sort(()=>Math.random()-.5).forEach(id=>enfile(id,'nuit'))}};
+
+ST.d_election={cond:()=>S.capitaine&&S.num===1&&S.cap==null&&vivants().length>1,titre:()=>'Élection du Capitaine',btn:'Valider',
+ html:()=>dire("Avant tout, le village doit élire son Capitaine. Qui veut se présenter ? Chaque candidat peut faire un court discours, puis on vote à main levée.")+
+  `<div class="card"><h3>Capitaine élu</h3>${picker('cap')}<p class="tip">Remets-lui la carte ⭐ Capitaine. Son vote comptera double.</p></div>`,
+ next:()=>{if(S.tmp.cap==null)return 'Indique le Capitaine élu.';S.cap=S.tmp.cap;log(`${P(S.cap).nom} est élu(e) Capitaine.`)}};
+
+ST.d_debat={titre:()=>'Le débat',btn:'Passer au vote',
+ html:()=>dire("Le village se réunit sur la place. Parmi vous se cachent des Loups-Garous… Débattez !")+htmlTimer()+
+  `<div class="card tip">• Reste neutre : ne laisse rien paraître de ce que tu sais.<br>• Les joueurs morts ne parlent plus et ne votent pas.<br>• Coupe le débat quand il tourne en rond.</div>`,
+ next:()=>{clearInterval(T.iv);T.run=false;T.reste=T.dur}};
+
+ST.d_vote={titre:()=>'Le vote',btn:'Valider le vote',
+ html:()=>{const v=S.tmp.votes||(S.tmp.votes={});let h=dire("Le moment est venu de voter. À trois, chacun pointe du doigt la personne qu'il veut éliminer. Un… deux… trois !");
+  h+='<div class="card"><h3>Décompte (facultatif)</h3>'+vivants().map(p=>`<div class="row"><span class="grow">${esc(p.nom)}${S.cap===p.id?' ⭐':''}</span><button class="ib" onclick="vt(${p.id},-1)">−</button><b class="cnt">${v[p.id]||0}</b><button class="ib" onclick="vt(${p.id},1)">+</button></div>`).join('');
+  if(S.cap!=null&&P(S.cap)&&P(S.cap).alive)h+=`<p class="tip">⭐ Le vote de ${nm(S.cap)} (Capitaine) compte double : ajoute 2 voix à sa cible.</p>`;
+  h+=`</div><div class="card"><h3>Joueur éliminé</h3>${picker('elim')}<button class="chip ${S.tmp.elim===-1?'sel':''}" onclick="pk('elim',-1,false,1)">Personne</button><p class="tip">En cas d'égalité : fixe une règle avant la partie et garde-la (souvent : le Capitaine départage, ou on revote entre les ex æquo).</p></div>`;
+  return h},
+ next:()=>{const e=S.tmp.elim;if(e==null)return 'Indique qui est éliminé (ou « Personne »).';
+  if(e===-1)log('Le vote n\'a éliminé personne.');else{log(`Le village a voté contre ${P(e).nom}.`);enfile(e,'vote')}}};
+
+ST.d_fin={titre:()=>'La nuit approche',btn:'🌙 Passer à la nuit',
+ html:()=>dire("Le soleil se couche sur Thiercelieux. Le village s'endort…")+`<p class="tip">Joueurs en vie : ${vivants().length}</p>`,
+ next:()=>{startNuit(S.num+1);return 'GOTO'}};
+
+function vt(id,d){const v=S.tmp.votes;v[id]=Math.max(0,(v[id]||0)+d);
+ const e=Object.entries(v).filter(x=>x[1]>0),mx=Math.max(0,...e.map(x=>x[1])),top=e.filter(x=>x[1]===mx);
+ if(mx>0&&top.length===1)S.tmp.elim=+top[0][0];else if(top.length>1)S.tmp.elim=null;save();render()}
+
+function startNuit(n){S.cycle='nuit';S.num=n;S.steps=NUIT;S.idx=0;S.tmp={};S.nuit={victime:null,sauvee:false,poison:null}}
+function startJour(){S.cycle='jour';S.steps=JOUR;S.idx=0;S.tmp={}}
+function enfile(id,cause){const p=P(id);if(!p||!p.alive||S.queue.some(q=>q.id===id))return;S.queue.push({id,cause})}
+
+function go(){const st=ST[S.steps[S.idx]],bak=JSON.stringify(S);const r=st.next?st.next():undefined;
+ if(typeof r==='string'&&r!=='GOTO'){S=JSON.parse(bak);toast(r);return}
+ HIST.push(bak);if(HIST.length>60)HIST.shift();
+ if(r!=='GOTO'){S.idx++;S.tmp={}}save();window.scrollTo(0,0);render()}
+
+/* ---------- morts ---------- */
+const CAUSES={nuit:'mort(e) cette nuit',vote:'éliminé(e) par le village',chasseur:'abattu(e) par le Chasseur',chagrin:'mort(e) de chagrin'};
+function partenaire(p){return p.lover?S.players.find(x=>x.lover&&x.id!==p.id):null}
+function htmlMort(){const q=S.queue[0],p=P(q.id),r=S.tmp.mr||p.role,a=partenaire(p);
+ const ex=S.queue.map(x=>x.id);if(a&&a.alive)ex.push(a.id);
+ let h=`<div class="phase">${S.cycle==='nuit'?'🌙 Nuit':'☀️ Jour'} ${S.num}</div><h2>☠️ ${esc(p.nom)}</h2>`+dire(`${esc(p.nom)}, tu es ${CAUSES[q.cause]}. Retourne ta carte face visible.`);
+ h+=`<div class="card"><h3>Carte révélée</h3><select onchange="setT('mr',this.value)">${ORDER.map(x=>`<option value="${x}" ${x===r?'selected':''}>${rn(x)}</option>`).join('')}</select><p class="tip">Corrige ici si la carte retournée n'est pas celle notée.</p></div>`;
+ if(r==='chasseur')h+=dire("Chasseur, dans un dernier souffle, tu tires : désigne le joueur que tu emportes avec toi.")+`<div class="card"><h3>Cible du Chasseur</h3>${picker('tir',{exclude:S.queue.map(x=>x.id)})}</div>`;
+ if(a&&a.alive&&!S.queue.some(x=>x.id===a.id))h+=`<div class="reveal">💔 ${esc(p.nom)} était amoureux(se) de <b>${esc(a.nom)}</b>, qui va mourir de chagrin.</div>`;
+ if(S.capitaine&&S.cap===p.id&&vivants().some(x=>!ex.includes(x.id)))h+=dire("Capitaine, avant de mourir, désigne ton successeur.")+`<div class="card" style="margin-top:12px"><h3>Nouveau Capitaine</h3>${picker('succ',{exclude:ex})}</div>`;
+ return h}
+function confirmMort(){const q=S.queue[0],p=P(q.id),r=S.tmp.mr||p.role,a=partenaire(p);
+ const ex=S.queue.map(x=>x.id);if(a&&a.alive)ex.push(a.id);
+ if(r==='chasseur'&&S.tmp.tir==null&&vivants().some(x=>!S.queue.some(y=>y.id===x.id)))return toast('Le Chasseur doit désigner sa cible.');
+ if(S.capitaine&&S.cap===p.id&&S.tmp.succ==null&&vivants().some(x=>!ex.includes(x.id)))return toast('Désigne le nouveau Capitaine.');
+ snap();p.role=r;p.alive=false;S.queue.shift();log(`${p.nom} meurt (${CAUSES[q.cause]}) : ${ROLES[r].nom}.`);
+ if(a&&a.alive)enfile(a.id,'chagrin');
+ if(r==='chasseur'&&S.tmp.tir!=null){log(`Le Chasseur abat ${P(S.tmp.tir).nom}.`);enfile(S.tmp.tir,'chasseur')}
+ if(S.cap===p.id){S.cap=S.tmp.succ!=null?S.tmp.succ:null;if(S.cap!=null)log(`${P(S.cap).nom} devient Capitaine.`)}
+ S.tmp.mr=null;S.tmp.tir=null;S.tmp.succ=null;save();window.scrollTo(0,0);render()}
+
+function gagnant(){if(!S.ready)return null;const al=vivants();if(!al.length)return 'personne';
+ const am=S.players.filter(p=>p.lover),mixte=am.length===2&&((am[0].role==='loup')!==(am[1].role==='loup'));
+ if(mixte&&al.length===2&&al.every(p=>p.lover))return 'amoureux';
+ const l=al.filter(p=>p.role==='loup').length;if(!l)return 'village';if(l===al.length)return 'loups';return null}
+const WIN={village:['🏡','Le village a gagné !',"Tous les Loups-Garous ont été éliminés. Thiercelieux peut enfin dormir tranquille."],
+ loups:['🐺','Les Loups-Garous ont gagné !',"Le village a été entièrement dévoré."],
+ amoureux:['💘','Les Amoureux ont gagné !',"L'amour a triomphé de tout : ils sont les deux derniers survivants."],
+ personne:['💀','Personne ne survit…',"Le village est désert."]};
+
+/* ---------- minuteur ---------- */
+let T={dur:180,reste:180,run:false,iv:null};
+const tm=()=>Math.floor(T.reste/60)+':'+String(T.reste%60).padStart(2,'0');
+function htmlTimer(){return `<div class="card"><h3>Minuteur (facultatif)</h3><div id="tm" class="big">${tm()}</div><div class="chips center">${[2,3,5].map(x=>`<button class="chip ${T.dur===x*60?'sel':''}" onclick="tSet(${x})">${x} min</button>`).join('')}<button class="chip" onclick="tGo()">${T.run?'⏸ Pause':'▶ Lancer'}</button><button class="chip" onclick="tSet(T.dur/60)">↺</button></div></div>`}
+function tSet(x){clearInterval(T.iv);T={dur:x*60,reste:x*60,run:false,iv:null};render()}
+function tGo(){if(T.run){clearInterval(T.iv);T.run=false}else if(T.reste>0){T.run=true;T.iv=setInterval(()=>{T.reste--;const e=$('#tm');if(e)e.textContent=tm();
+ if(T.reste<=0){clearInterval(T.iv);T.run=false;if(navigator.vibrate)navigator.vibrate([300,100,300]);speak('Fin du temps de débat !');render()}},1000)}render()}
+
+/* ---------- préparation ---------- */
+function suggest(n){const c={};ORDER.forEach(r=>c[r]=0);c.loup=n<=6?1:n<=11?2:n<=17?3:4;
+ [['voyante',4],['sorciere',7],['chasseur',8],['cupidon',9],['petitefille',11]].forEach(([r,m])=>{if(n>=m)c[r]=1});
+ const u=ORDER.reduce((a,r)=>a+c[r],0);c.villageois=Math.max(0,Math.min(13,n-u));return c}
+function addNom(e){e.preventDefault();const i=$('#nn'),v=i.value.trim();if(!v)return;S.noms.push(v);if(!S.compPerso)S.comp=suggest(S.noms.length);save();render();setTimeout(()=>{const x=$('#nn');if(x)x.focus()},0)}
+function rmNom(i){S.noms.splice(i,1);if(!S.compPerso)S.comp=suggest(S.noms.length);save();render()}
+function mvNom(i,d){const j=i+d;if(j<0||j>=S.noms.length)return;[S.noms[i],S.noms[j]]=[S.noms[j],S.noms[i]];save();render()}
+function cp(r,d){S.comp[r]=Math.max(0,Math.min(ROLES[r].max,(S.comp[r]||0)+d));S.compPerso=true;save();render()}
+function sugg(){S.comp=suggest(S.noms.length);S.compPerso=false;save();render()}
+function htmlSetup(){const n=S.noms.length;if(!S.comp)S.comp=suggest(n);
+ const tot=ORDER.reduce((a,r)=>a+(S.comp[r]||0),0),att=n+(S.comp.voleur?2:0);
+ let h=`<div class="card tip">👋 L'appli te guide pas à pas : les encadrés <b>« À dire »</b> sont à lire à voix haute, le reste est pour toi seul. Touche les prénoms pour noter ce qui se passe.</div>`;
+ h+=`<div class="card"><h3>Joueurs (${n})</h3><p class="tip">Entre-les dans l'ordre où ils sont assis. Le meneur ne joue pas.</p>`+S.noms.map((x,i)=>`<div class="row"><span class="num">${i+1}</span><span class="grow">${esc(x)}</span><button class="ib" onclick="mvNom(${i},-1)">↑</button><button class="ib" onclick="rmNom(${i})">✕</button></div>`).join('')+
+  `<form class="add" onsubmit="addNom(event)"><input id="nn" placeholder="Prénom" autocomplete="off" enterkeyhint="done"><button class="ib">Ajouter</button></form></div>`;
+ h+=`<div class="card"><h3>Composition</h3><button class="chip" onclick="sugg()">✨ Suggestion pour ${n} joueurs</button><div style="margin-top:8px"></div>`+
+  ORDER.map(r=>`<div class="row"><span class="grow" onclick="sheet('aide:${r}')">${rn(r)} <span class="q">ⓘ</span></span><button class="ib" onclick="cp('${r}',-1)">−</button><b class="cnt">${S.comp[r]||0}</b><button class="ib" onclick="cp('${r}',1)">+</button></div>`).join('')+
+  `<label class="chk"><input type="checkbox" ${S.capitaine?'checked':''} onchange="S.capitaine=this.checked;save()"> ⭐ Élire un Capitaine (vote double)</label>`+
+  `<p class="${tot===att?'ok':'err'}">Cartes : ${tot} / ${att}${S.comp.voleur?' (joueurs + 2 pour le Voleur)':''}</p></div>`;
+ let pb='';if(n<5)pb='Il faut au moins 5 joueurs (la boîte est prévue pour 8 à 18).';else if(!S.comp.loup)pb='Il faut au moins un Loup-Garou.';else if(tot!==att)pb='Ajuste la composition pour avoir '+att+' cartes.';
+ if(pb)h+=`<p class="tip" style="text-align:center">${pb}</p>`;
+ return {h,ok:!pb}}
+function startPartie(){snap();S.players=S.noms.map((nom,i)=>({id:i,nom,role:null,alive:true,lover:false}));
+ Object.assign(S,{phase:'distrib',out:[],cap:null,witch:{vie:true,mort:true},queue:[],log:[],ready:false,winner:null,tmp:{}});save();window.scrollTo(0,0);render()}
+function htmlDistrib(){return `<h2>Distribution</h2><div class="card"><h3>1. Prépare le paquet</h3>${ORDER.filter(r=>S.comp[r]).map(r=>`<div class="row"><span class="grow">${rn(r)}</span><b>× ${S.comp[r]}</b></div>`).join('')}${S.capitaine?'<p class="tip">Garde la carte ⭐ Capitaine de côté : elle ira au joueur élu.</p>':''}</div>
+ <div class="card tip"><h3>2. Distribue</h3>Mélange et donne une carte face cachée à chaque joueur.${S.comp.voleur?' Pose les <b>2 cartes restantes</b> face cachée au centre de la table (pour le Voleur).':''}
+ <h3 style="margin-top:14px">3. Découverte</h3>Chacun regarde sa carte en secret, puis la repose face cachée devant lui.
+ <h3 style="margin-top:14px">4. Rappelle les règles d'or</h3>On ne montre jamais sa carte. Un mort ne parle plus. La nuit, on garde les yeux fermés.</div>`}
+function debut(){snap();S.phase='game';startNuit(1);save();garderEcran();window.scrollTo(0,0);render()}
+function nouvelle(){const k={noms:S.noms,comp:S.comp,compPerso:S.compPerso,capitaine:S.capitaine};clearInterval(T.iv);S=Object.assign(fresh(),k);HIST=[];save();closeSheet();window.scrollTo(0,0);render()}
+function htmlFin(){const w=WIN[S.winner];return `<div class="card win"><div style="font-size:3.5rem">${w[0]}</div>${w[1]}</div>`+dire(w[2])+
+ `<div class="card"><h3>Les rôles</h3>${S.players.map(p=>`<div class="row ${p.alive?'':'mort'}"><span class="grow"><b>${esc(p.nom)}</b> ${p.lover?'💘':''}${S.cap===p.id?'⭐':''}</span><span>${rn(p.role)}</span><span>${p.alive?'❤️':'☠️'}</span></div>`).join('')}</div>`+
+ `<details><summary>📜 Journal de la partie</summary>${S.log.map(l=>`<p class="tip"><span class="tag">${l.c}</span> ${esc(l.t)}</p>`).join('')}</details>`}
+
+/* ---------- rendu ---------- */
+let lastK='';
+function render(){
+ if(S.phase==='game'&&!S.queue.length){const w=gagnant();if(w){S.phase='fin';S.winner=w;log('Fin de partie : '+WIN[w][1]);save()}}
+ document.body.className=S.phase==='game'?S.cycle:'';renderTop();
+ let h='',btn=null,act='',dis=false;
+ if(S.phase==='setup'){const r=htmlSetup();h=r.h;btn='Distribuer les cartes →';act='startPartie()';dis=!r.ok}
+ else if(S.phase==='distrib'){h=htmlDistrib();btn='🌙 Commencer la nuit 1';act='debut()'}
+ else if(S.phase==='fin'){h=htmlFin();btn='🔁 Nouvelle partie';act='nouvelle()'}
+ else if(S.queue.length){h=htmlMort();btn='Confirmer';act='confirmMort()'}
+ else{while(S.idx<S.steps.length-1){const st=ST[S.steps[S.idx]];if(!st.cond||st.cond())break;S.idx++}
+  const st=ST[S.steps[S.idx]];h=`<div class="phase">${S.cycle==='nuit'?'🌙 Nuit':'☀️ Jour'} ${S.num}</div><h2>${st.titre()}</h2>`+st.html();btn=st.btn||'Suivant';act='go()'}
+ $('#app').innerHTML=h+(btn?`<div class="footer"><button class="btn" onclick="${act}" ${dis?'disabled':''}>${btn}</button></div>`:'');
+ if(voix){const k=S.phase+S.cycle+S.num+'-'+S.idx+'-'+S.queue.length;if(k!==lastK){lastK=k;const r=document.querySelector('#app .read .t');if(r)speak(r.innerText)}}
+}
+function renderTop(){const g=S.phase==='game'||S.phase==='fin';
+ $('#top').innerHTML=`<h1>${S.phase==='game'?(S.cycle==='nuit'?'🌙 Nuit ':'☀️ Jour ')+S.num:'🐺 Meneur de Loup-Garou'}</h1>`+
+ (g?`<button class="ib" onclick="sheet('joueurs')" aria-label="Joueurs">👥</button><button class="ib" onclick="sheet('journal')" aria-label="Journal">📜</button>`:'')+
+ (S.phase!=='setup'?`<button class="ib" onclick="undo()" aria-label="Annuler">↶</button>`:'')+`<button class="ib" onclick="sheet('menu')" aria-label="Menu">☰</button>`}
+
+function sheet(k){const s=$('#sheet');let h='';
+ if(k==='joueurs'){h='<h2>Joueurs</h2><p class="tip">Vue réservée au meneur. Corrige ici un rôle ou un état en cas d\'erreur.</p>'+S.players.map(p=>`<div class="row ${p.alive?'':'mort'}"><span class="grow"><b>${esc(p.nom)}</b> ${p.lover?'💘':''}${S.cap===p.id?'⭐':''}<select onchange="setRole(${p.id},this.value)"><option value="">❓ Inconnu</option>${ORDER.map(r=>`<option value="${r}" ${p.role===r?'selected':''}>${rn(r)}</option>`).join('')}</select></span><button class="ib" onclick="togVie(${p.id})">${p.alive?'❤️':'☠️'}</button></div>`).join('')+
+  `<p class="tip" style="margin-top:12px">🧪 Potions de la Sorcière : vie ${S.witch.vie?'✅':'❌'} · mort ${S.witch.mort?'✅':'❌'}</p>`+(S.out.length?`<p class="tip">🃏 Hors jeu (centre) : ${S.out.map(rn).join(', ')}</p>`:'')}
+ else if(k==='journal')h='<h2>Journal</h2>'+(S.log.length?S.log.slice().reverse().map(l=>`<div class="row"><span class="tag">${l.c}</span><span class="grow">${esc(l.t)}</span></div>`).join(''):'<p class="tip">Rien pour l\'instant.</p>');
+ else if(k.startsWith('aide:')){const r=k.slice(5);h=`<h2>${rn(r)}</h2><p>${ROLES[r].desc}</p>`}
+ else h=`<h2>Menu</h2><label class="chk"><input type="checkbox" ${voix?'checked':''} onchange="voix=this.checked;localStorage.setItem(VKEY,voix?'1':'0')"> 🔊 Lire automatiquement les textes « À dire » (voix du téléphone)</label><h3 style="margin-top:18px">Aide-mémoire des rôles</h3>`+
+  ORDER.map(r=>`<details><summary>${rn(r)}</summary><p class="tip">${ROLES[r].desc}</p></details>`).join('')+`<details><summary>⭐ Capitaine</summary><p class="tip">${CAP}</p></details><details><summary>🏆 Victoire</summary><p class="tip">${VICT}</p></details>`+
+  `<details><summary>🌙 Ordre d'appel de la nuit</summary><p class="tip">1ʳᵉ nuit seulement : Voleur → Cupidon → Amoureux.<br>Chaque nuit : Voyante → Loups-Garous → Sorcière.</p></details>`+
+  (S.phase!=='setup'?`<button class="btn sec" style="margin-top:16px" onclick="abandon(this)">🔁 Abandonner / nouvelle partie</button>`:'');
+ s.innerHTML=`<div class="panel"><button class="ib close" onclick="closeSheet()">✕</button>${h}</div>`;s.classList.remove('hidden');s.dataset.k=k}
+function abandon(b){if(b.dataset.ok){nouvelle();return}b.dataset.ok=1;b.textContent='⚠️ Touche encore pour confirmer l\'abandon';b.style.background='var(--red)';b.style.color='#111'}
+function closeSheet(){$('#sheet').classList.add('hidden')}
+$('#sheet').addEventListener('click',e=>{if(e.target.id==='sheet')closeSheet()});
+function setRole(id,r){snap();P(id).role=r||null;save();render();sheet('joueurs')}
+function togVie(id){snap();const p=P(id);p.alive=!p.alive;log(`(Correction) ${p.nom} ${p.alive?'remis en vie':'marqué mort'}.`);save();render();if(S.phase==='game')sheet('joueurs');else closeSheet()}
+
+let wl=null;async function garderEcran(){try{if('wakeLock' in navigator&&S.phase==='game')wl=await navigator.wakeLock.request('screen')}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')garderEcran()});
+if('serviceWorker' in navigator&&location.protocol==='https:')navigator.serviceWorker.register('sw.js').catch(()=>{});
+render();garderEcran();
+</script>
+</body>
+</html>
