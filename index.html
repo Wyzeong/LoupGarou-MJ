@@ -122,11 +122,15 @@ function pk(f,id,multi,max){if(multi){let a=(S.tmp[f]||[]).slice();if(a.includes
 function setT(k,v){S.tmp[k]=v;save();render()}
 
 /* ---------- déroulé ---------- */
-const NUIT=['n_intro','n_voleur','n_reperage','n_cupidon','n_amoureux','n_voyante','n_loups','n_sorciere','n_fin'];
+const NUIT=['n_ambiance','n_intro','n_voleur','n_reperage','n_cupidon','n_amoureux','n_voyante','n_loups','n_sorciere','n_fin'];
 const JOUR=['d_reveil','d_election','d_debat','d_vote','d_fin'];
 const ST={};
 const aReperer=()=>['chasseur','petitefille'].filter(r=>enJeu(r)>0&&!porteurs(r).length);
 function mortsNuit(){const m=[],n=S.nuit;if(n.victime!=null&&!n.sauvee)m.push(n.victime);if(n.poison!=null&&!m.includes(n.poison))m.push(n.poison);return m}
+
+ST.n_ambiance={cond:()=>S.num===1&&!S.ready,titre:()=>'Il était une fois Thiercelieux…',btn:'Le village s\'endort →',
+ html:()=>`<div class="card tip">🕯️ Baisse la lumière si tu peux. Parle lentement, à voix basse, et marque bien les pauses (…).</div>`+
+ dire("Bienvenue à Thiercelieux, un petit village perdu au creux de la forêt, loin de tout.<br><br>Depuis plusieurs nuits, d'étranges bruits troublent le sommeil des villageois : des grattements contre les volets… des pas lourds dans la boue… et, au loin, des hurlements qui glacent le sang.<br><br>Le vieux berger a été retrouvé un matin, à l'orée du bois… ou du moins, ce qu'il en restait. Puis ce fut le tour de la fille du meunier. Les traces autour de son corps ne ressemblaient à celles d'aucune bête connue.<br><br>Les anciens murmurent une vieille légende : certains d'entre nous, la nuit venue, ne seraient plus tout à fait humains.<br><br>Ce soir, la lune est pleine. Regardez bien vos voisins… car parmi vous, assis à cette table, se cachent des Loups-Garous.<br><br>Le jour, ils vous sourient. La nuit, ils chassent.<br><br>Votre seule chance de survie : les démasquer… avant qu'il ne soit trop tard.")};
 
 ST.n_intro={titre:()=>'La nuit tombe',btn:'Commencer la nuit',
  html:()=>dire(S.num===1?"C'est la nuit sur Thiercelieux. Tout le village s'endort : fermez les yeux et baissez la tête.":"La nuit tombe sur Thiercelieux. Le village s'endort : fermez les yeux.")+
