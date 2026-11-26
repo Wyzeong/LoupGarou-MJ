@@ -103,6 +103,41 @@ body.jour.th-perso,body.jour.th-nl,body.jour.th-tout{--acc:#c98a33;--acctxt:#1a1
 @keyframes apparait{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
   .splash.deja *{animation:none!important}
 body.accueil main{padding-bottom:calc(30px + env(safe-area-inset-bottom))}
+
+/* ---------- tablette ---------- */
+@media (min-width:700px){
+ body{font-size:17px}
+ main{max-width:860px;padding:22px 28px 130px}
+ header{padding-left:28px;padding-right:28px}
+ header h1{font-size:1.5rem}
+ .ib{min-height:46px;padding:10px 14px;font-size:1.1rem}
+ h2{font-size:2.4rem}
+ .card{padding:18px 20px;border-radius:16px}
+ .read{font-size:1.5rem;padding:28px 22px 18px}
+ .chip{font-size:1.12rem;padding:13px 20px;min-height:52px}
+ .chips{gap:10px}
+ .tip{font-size:1rem}
+ .footer .btn{max-width:600px;font-size:1.25rem;padding:20px}
+ .grille2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
+ .grille2>.card{margin-bottom:0}
+ .sheet{align-items:center;padding:24px}
+ .panel{border-radius:20px;max-width:720px;max-height:84vh;border:1px solid #ffffff18}
+ .sp-titre{font-size:clamp(4.4rem,10vw,6.5rem)}
+ .sp-kicker{font-size:1.5rem}.sp-sous{font-size:.95rem}.sp-cit{font-size:1.6rem}
+ .sp-btns{max-width:520px}
+ .tuile{padding:16px 18px}.tuile b{font-size:1.45rem}
+ .big{font-size:4.5rem}
+}
+@media (min-aspect-ratio:1/1){.lune{transform:translate(230px,-150px)}}
+/* tablette à l'horizontale : textes à dire à gauche, actions à droite */
+@media (min-width:1000px) and (orientation:landscape){
+ main{max-width:1240px}
+ .etape{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);column-gap:22px;grid-auto-flow:row dense;align-items:start}
+ .etape>*{grid-column:2}
+ .etape>.read{grid-column:1}
+ .etape>.entete{grid-column:1/-1}
+ .footer .btn{max-width:700px}
+}
 </style>
 </head>
 <body>
@@ -460,7 +495,7 @@ function recitMort(n,c){const fin=` ${n}, retourne ta carte : qui étais-tu vrai
   chagrin:`En voyant s'éteindre l'être aimé, le cœur de ${n} se brise. Incapable de vivre sans l'autre, ${n} s'effondre à son tour, emporté(e) par le chagrin.`}[c]+fin}
 function htmlMort(){const q=S.queue[0],p=P(q.id),r=S.tmp.mr||p.role||'villageois',a=partenaire(p);
  const ex=S.queue.map(x=>x.id);if(a&&a.alive)ex.push(a.id);
- let h=`<div class="phase">${lib()}</div><h2>☠️ ${esc(p.nom)}</h2>`+dire(recitMort(esc(p.nom),q.cause));
+ let h=`<div class="entete"><div class="phase">${lib()}</div><h2>☠️ ${esc(p.nom)}</h2></div>`+dire(recitMort(esc(p.nom),q.cause));
  h+=`<div class="card"><h3>Carte révélée</h3><select onchange="setT('mr',this.value)">${ORDER.map(x=>`<option value="${x}" ${x===r?'selected':''}>${rn(x)}</option>`).join('')}</select><p class="tip">Corrige ici si la carte retournée n'est pas celle notée.</p></div>`;
  if(r==='chasseur'&&!S.tmp.sd&&!S.pouvoirsPerdus)h+=dire("Chasseur, tu sens la vie te quitter… mais dans un dernier effort, tu épaules ton fusil. Désigne celui ou celle que tu emportes avec toi dans la tombe.")+`<div class="card"><h3>Cible du Chasseur</h3>${picker('tir',{exclude:S.queue.map(x=>x.id)})}</div>`;
  if(a&&a.alive&&!S.queue.some(x=>x.id===a.id))h+=`<div class="reveal">💔 ${esc(p.nom)} était amoureux(se) de <b>${esc(a.nom)}</b>, qui va mourir de chagrin.</div>`;
@@ -545,12 +580,14 @@ function htmlSetup(){const n=S.noms.length;if(!S.comp)S.comp=suggest(n);
  let h='';
  if(extN()&&!extP())h+=`<div class="card"><button class="chip" onclick="sheet('explic')">📖 Explication détaillée des nouvelles cartes</button></div>`;
  if(extP())h+=`<div class="card"><h3>Étape</h3><div class="chips">${[1,2,3].map(e=>`<button class="chip ${S.etape===e?'sel':''}" onclick="setEtape(${e})">${e}. ${ETAPES[e][0]}</button>`).join('')}</div><p class="tip">${ETAPES[S.etape][1]}. Chaque étape garde les rôles des étapes précédentes.</p><button class="chip" style="margin-top:10px" onclick="sheet('explic')">📖 Explication détaillée des nouvelles cartes</button></div>`;
+ h+='<div class="grille2">';
  h+=`<div class="card"><h3>Joueurs (${n})</h3><p class="tip">Entre-les dans l'ordre où ils sont assis, en tournant dans le sens des aiguilles d'une montre. Le meneur ne joue pas.</p>`+S.noms.map((x,i)=>`<div class="row"><span class="num">${i+1}</span><span class="grow">${esc(x)}</span><button class="ib" onclick="mvNom(${i},-1)">↑</button><button class="ib" onclick="rmNom(${i})">✕</button></div>`).join('')+
   `<form class="add" onsubmit="addNom(event)"><input id="nn" placeholder="Prénom" autocomplete="off" enterkeyhint="done"><button class="ib">Ajouter</button></form></div>`;
  h+=`<div class="card"><h3>Composition</h3><button class="chip" onclick="sugg()">🔀 Nouveau tirage pour ${n} joueurs</button><p class="tip">Les rôles tournent d'une partie à l'autre : ceux qui n'ont pas servi récemment passent en priorité.</p><div style="margin-top:8px"></div>`+
   ORDER.filter(r=>dispo(r)||S.comp[r]).map(r=>`<div class="row"><span class="grow" onclick="sheet('aide:${r}')">${rn(r)} <span class="q">ⓘ</span></span><button class="ib" onclick="cp('${r}',-1)">−</button><b class="cnt">${S.comp[r]||0}</b><button class="ib" onclick="cp('${r}',1)">+</button></div>`).join('')+
   `<label class="chk"><input type="checkbox" ${S.capitaine?'checked':''} onchange="S.capitaine=this.checked;save()"> ⭐ Élire un Capitaine (vote double)</label>`+
   `<p class="${tot===att?'ok':'err'}">Cartes : ${tot} / ${att}${S.comp.voleur?' (joueurs + 2 pour le Voleur)':''}</p></div>`;
+ h+='</div>';
  let pb='';if(n<5)pb='Il faut au moins 5 joueurs (la boîte est prévue pour 8 à 18).';else if(!LOUPS.some(r=>S.comp[r]))pb='Il faut au moins un Loup-Garou.';else if(S.comp.soeur===1)pb='Les Sœurs vont par deux.';else if(tot!==att)pb='Ajuste la composition pour avoir '+att+' cartes.';
  if(pb)h+=`<p class="tip" style="text-align:center">${pb}</p>`;
  return {h,ok:!pb}}
@@ -585,9 +622,9 @@ function render(){
  if(S.phase==='setup'){const r=htmlSetup();h=r.h;btn='Distribuer les cartes →';act='startPartie()';dis=!r.ok}
  else if(S.phase==='distrib'){h=htmlDistrib();btn=S.comp.ange?'☀️ Commencer la partie':'🌙 Commencer la nuit 1';act='debut()'}
  else if(S.phase==='fin'){h=htmlFin();btn='🔁 Nouvelle partie';act='nouvelle();accueil=true;render()'}
- else if(S.queue.length){h=htmlMort();btn='Confirmer';act='confirmMort()'}
+ else if(S.queue.length){h='<div class="etape">'+htmlMort()+'</div>';btn='Confirmer';act='confirmMort()'}
  else{while(S.idx<S.steps.length-1){const st=ST[S.steps[S.idx]];if(!st.cond||st.cond())break;S.idx++}
-  const st=ST[S.steps[S.idx]];h=`<div class="phase">${lib()}</div><h2>${st.titre()}</h2>`+st.html();btn=st.btn||'Suivant';act='go()'}
+  const st=ST[S.steps[S.idx]];h=`<div class="etape"><div class="entete"><div class="phase">${lib()}</div><h2>${st.titre()}</h2></div>`+st.html()+'</div>';btn=st.btn||'Suivant';act='go()'}
  $('#app').innerHTML=h+(btn?`<div class="footer"><button class="btn" onclick="${act}" ${dis?'disabled':''}>${btn}</button></div>`:'');
 }
 function renderTop(){const g=S.phase==='game'||S.phase==='fin';
@@ -633,7 +670,7 @@ function foret(t){t=t||'classique';let sd=7;const rnd=()=>(sd=(sd*9301+49297)%23
   nl:`<circle cx="715" cy="330" r="120" fill="url(#haloB)"/><circle cx="715" cy="330" r="52" fill="#05080d"/><circle cx="715" cy="330" r="52" fill="none" stroke="#a9bbd8" stroke-width="1.6" opacity=".55"/><path d="M 676 296 A 52 52 0 0 0 676 364" fill="none" stroke="#dfe8f5" stroke-width="2.4" opacity=".7"/>`,
   tout:`<circle cx="715" cy="330" r="150" fill="url(#haloR)"/><circle cx="715" cy="330" r="60" fill="none" stroke="#ff4a2a" stroke-width="10" opacity=".35" filter="url(#flou)"/><circle cx="715" cy="330" r="52" fill="#0b0302"/><circle cx="715" cy="330" r="52" fill="none" stroke="#ff7a4a" stroke-width="2" opacity=".8"/>`}[t];
  const OEIL={classique:'#ff2b2b',perso:'#ff6a1a',nl:'#ffd23f',tout:'#ff2b2b'}[t];
- g+=LUNE;
+ g+='<g class="lune">'+LUNE+'</g>';
  g+='<g fill="#0c1a22">';for(let x=-20;x<1240;x+=28+rnd()*26)g+=sapin(x,600,110+rnd()*90,24+rnd()*14);g+='<rect y="598" width="1200" height="120"/></g>';
  g+='<g class="yeux" filter="url(#lueur)">';const E=[[150,560,1],[300,585,1.1],[430,552,.8],[520,590,1],[600,560,.75],[655,615,1.2],[720,575,.9],[780,600,1.05],[470,625,1.25],[905,590,1.2],[1040,552,.85],[560,640,1.3]];
  E.forEach(([x,y,k],i)=>{const d=(rnd()*9).toFixed(1),du=(7+rnd()*6).toFixed(1),e=7*k;g+=`<g class="oeil" style="animation-delay:${d}s;animation-duration:${du}s"><ellipse cx="${x}" cy="${y}" rx="${3.4*k}" ry="${2*k}" fill="${OEIL}"/><ellipse cx="${x+e*1.6}" cy="${y}" rx="${3.4*k}" ry="${2*k}" fill="${OEIL}"/></g>`});g+='</g>';
